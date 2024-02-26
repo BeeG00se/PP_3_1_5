@@ -31,8 +31,8 @@ public class User implements UserDetails {
 
     @Column(name = "password")
     private String password;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @Fetch(FetchMode.JOIN)
+    @ManyToMany(fetch = FetchType.EAGER)
+//    @Fetch(FetchMode.JOIN)
     @JoinTable(name = "user_role")
     private List<Role> role;
 
