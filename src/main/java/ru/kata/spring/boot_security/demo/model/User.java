@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -16,7 +18,7 @@ public class User implements UserDetails {
     @Id
     @Column(name = "userId")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userId;
+    private Integer userId;
 
     @NotEmpty(message = "Это поле должно быть запонено")
     @Size(min = 2, max = 100, message = "Имя должно быть от 2 до 100 символов длиной")
@@ -29,7 +31,8 @@ public class User implements UserDetails {
 
     @Column(name = "password")
     private String password;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @Fetch(FetchMode.JOIN)
     @JoinTable(name = "user_role")
     private List<Role> role;
 
@@ -44,20 +47,21 @@ public class User implements UserDetails {
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", password='" + password + '\'' +
+                ", roles='" + role + '\'' +
                 '}';
     }
 
-    public User(int userId, String name, String surname) {
+    public User(Integer userId, String name, String surname, List<Role> role) {
         this.userId = userId;
         this.name = name;
         this.surname = surname;
+        this.role = role;
     }
-
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
@@ -77,6 +81,13 @@ public class User implements UserDetails {
         this.surname = surname;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRole(List<Role> role) {
+        this.role = role;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

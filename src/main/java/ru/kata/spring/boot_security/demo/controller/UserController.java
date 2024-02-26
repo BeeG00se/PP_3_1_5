@@ -1,6 +1,4 @@
 package ru.kata.spring.boot_security.demo.controller;
-
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

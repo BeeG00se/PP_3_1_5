@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,46 +21,32 @@ public class AdminController {
     }
 
     @GetMapping("/")
-    public String table(Model model) {
+    public String table(Model model,@CurrentSecurityContext(expression = "authentication.principal") User principal) {
         model.addAttribute("table", userService.getAllUsers());
+        model.addAttribute("user", principal);
         return "table";
-    }
-
-    @GetMapping("/new")
-    public String addUser(Model model) {
-        model.addAttribute("user", new User());
-        return "create";
     }
 
     @PostMapping("/new")
     public String add(@ModelAttribute("user") User user, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "create";
-        } else {
+        if (!bindingResult.hasErrors()) {
             userService.addUser(user);
-            return "redirect:/";
         }
+        return "redirect:/admin/";
     }
 
     @PostMapping("/delete")
     public String delete(@RequestParam int id) {
         userService.removeUser(id);
-        return "redirect:/";
-    }
-
-    @GetMapping("/edit")
-    public String updateUser(@RequestParam int id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        return "edit";
+        return "redirect:/admin/";
     }
 
     @PostMapping("/edit")
-    public String update(User user, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "edit";
-        } else {
+    public String update(@RequestParam int id, User user, BindingResult bindingResult) {
+        user.setUserId(id);
+        if (!bindingResult.hasErrors()) {
             userService.updateUser(user);
-            return "redirect:/";
         }
+        return "redirect:/admin/";
     }
 }
