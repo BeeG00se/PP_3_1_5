@@ -21,6 +21,14 @@ public class Role implements GrantedAuthority {
                 '}';
     }
 
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String getAuthority() {
         return name;

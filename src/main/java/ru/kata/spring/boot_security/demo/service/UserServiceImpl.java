@@ -9,6 +9,7 @@ import ru.kata.spring.boot_security.demo.repositories.UserRepositories;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(int id) {
-        return userDao.findById(id).get();
+        return userDao.findById(id).orElse(null);
     }
 
     @Override

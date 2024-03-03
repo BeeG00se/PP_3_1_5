@@ -1,14 +1,20 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.Exception.UserExistException;
+import ru.kata.spring.boot_security.demo.Exception.UserIncorrectData;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.util.List;
+
+@CrossOrigin
 @RequestMapping("/admin")
 @Controller
 public class AdminController {
@@ -19,6 +25,37 @@ public class AdminController {
     public AdminController(UserService userService) {
         this.userService = userService;
     }
+    @ResponseBody
+    @GetMapping("/getAll")
+    public ResponseEntity<List<User>> getUsers() {
+        return new ResponseEntity<>(userService.getAllUsers(),HttpStatus.OK);
+    }
+    @ResponseBody
+    @GetMapping("/get/{id}")
+    public ResponseEntity<User> getUser (@PathVariable("id") Integer userId) {
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new UserExistException("There is no user with this ID");
+        }
+        return new ResponseEntity<>(user,HttpStatus.OK);
+    }
+    @ResponseBody
+    @ExceptionHandler
+    public ResponseEntity<UserIncorrectData> handleException(UserExistException exception) {
+        UserIncorrectData data = new UserIncorrectData();
+        data.setInfo(exception.getMessage());
+        return new ResponseEntity<>(data, HttpStatus.NOT_FOUND);
+    }
+
+    @ResponseBody
+    @ExceptionHandler
+    public ResponseEntity<UserIncorrectData> handleException(Exception exception) {
+        System.out.println(exception.getMessage());
+        UserIncorrectData data = new UserIncorrectData();
+        data.setInfo(exception.getMessage());
+        return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
+    }
+
 
     @GetMapping("/")
     public String table(Model model,@CurrentSecurityContext(expression = "authentication.principal") User principal) {
@@ -26,27 +63,24 @@ public class AdminController {
         model.addAttribute("user", principal);
         return "table";
     }
-
+    @ResponseBody
     @PostMapping("/new")
-    public String add(@ModelAttribute("user") User user, BindingResult bindingResult) {
-        if (!bindingResult.hasErrors()) {
-            userService.addUser(user);
-        }
-        return "redirect:/admin/";
+    public ResponseEntity<User> add(@RequestBody User user) {
+        System.out.println(user);
+        userService.addUser(user);
+        return ResponseEntity.ok().body(user);
     }
-
-    @PostMapping("/delete")
-    public String delete(@RequestParam int id) {
+    @ResponseBody
+    @DeleteMapping ("/delete/{id}")
+    public ResponseEntity<String> delete(@PathVariable("id") Integer id) {
         userService.removeUser(id);
-        return "redirect:/admin/";
+        return ResponseEntity.ok().body("User removed");
     }
-
-    @PostMapping("/edit")
-    public String update(@RequestParam int id, User user, BindingResult bindingResult) {
+    @ResponseBody
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody User user) {
         user.setUserId(id);
-        if (!bindingResult.hasErrors()) {
-            userService.updateUser(user);
-        }
-        return "redirect:/admin/";
+        userService.updateUser(user);
+        return ResponseEntity.ok().body("User updated");
     }
 }
