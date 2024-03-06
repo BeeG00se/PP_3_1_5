@@ -1,9 +1,9 @@
-package ru.kata.spring.boot_security.demo.Exception;
+package ru.kata.spring.boot_security.demo.exception;
 
-public class UserIncorrectData {
+public class UserNotFoundException extends RuntimeException {
     private String info;
 
-    public UserIncorrectData() {
+    public UserNotFoundException() {
     }
 
     public String getInfo() {

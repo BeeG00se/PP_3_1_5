@@ -7,8 +7,8 @@ import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.Exception.UserExistException;
-import ru.kata.spring.boot_security.demo.Exception.UserIncorrectData;
+import ru.kata.spring.boot_security.demo.exception.UserExistException;
+import ru.kata.spring.boot_security.demo.exception.UserNotFoundException;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
@@ -21,7 +21,7 @@ public class AdminController {
 
     private final UserService userService;
 
-    @Autowired()
+    @Autowired
     public AdminController(UserService userService) {
         this.userService = userService;
     }
@@ -41,17 +41,16 @@ public class AdminController {
     }
     @ResponseBody
     @ExceptionHandler
-    public ResponseEntity<UserIncorrectData> handleException(UserExistException exception) {
-        UserIncorrectData data = new UserIncorrectData();
+    public ResponseEntity<UserNotFoundException> handleException(UserExistException exception) {
+        UserNotFoundException data = new UserNotFoundException();
         data.setInfo(exception.getMessage());
         return new ResponseEntity<>(data, HttpStatus.NOT_FOUND);
     }
 
     @ResponseBody
     @ExceptionHandler
-    public ResponseEntity<UserIncorrectData> handleException(Exception exception) {
-        System.out.println(exception.getMessage());
-        UserIncorrectData data = new UserIncorrectData();
+    public ResponseEntity<UserNotFoundException> handleException(Exception exception) {
+        UserNotFoundException data = new UserNotFoundException();
         data.setInfo(exception.getMessage());
         return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
     }
@@ -66,7 +65,6 @@ public class AdminController {
     @ResponseBody
     @PostMapping("/new")
     public ResponseEntity<User> add(@RequestBody User user) {
-        System.out.println(user);
         userService.addUser(user);
         return ResponseEntity.ok().body(user);
     }
